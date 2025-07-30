@@ -6,16 +6,18 @@ function App() {
   const usuario = new Usuario('Lucas', 28, '123456');
 
   const [tentativaSenha, setTentativaSenha] = useState('');
-  const [resultado, setResultado] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
+  const [resultado, setResultado] = useState('');
   const [permitirRedefinir, setPermitirRedefinir] = useState(false);
+  const [autenticado, setAutenticado] = useState(false);
 
   const verificarSenha = () => {
     if (usuario.verificarSenha(tentativaSenha)) {
-      setResultado('Senha correta!');
+      setResultado('');
       setPermitirRedefinir(false);
+      setAutenticado(true);
     } else {
-      setResultado('Senha incorreta! Deseja redefinir?');
+      setResultado('Senha incorreta!');
       setPermitirRedefinir(true);
     }
   };
@@ -23,38 +25,55 @@ function App() {
   const redefinirSenha = () => {
     usuario.redefinirSenha(novaSenha);
     setResultado('Senha redefinida com sucesso!');
+    setPermitirRedefinir(false);
     setNovaSenha('');
     setTentativaSenha('');
-    setPermitirRedefinir(false);
+  };
+
+  const logout = () => {
+    setAutenticado(false);
+    setTentativaSenha('');
+    setResultado('');
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>{usuario.apresentar()}</h1>
+    <div className="container">
+      <div className="card fade-card">
+        <h1 className={autenticado ? 'fade-text show' : ''}>
+          {autenticado ? usuario.apresentar() : 'Entre no sistema'}
+        </h1>
+        {!autenticado && (
+          <div className="fade-elements">
+            <input
+              type="password"
+              placeholder="Digite a senha"
+              value={tentativaSenha}
+              onChange={(e) => setTentativaSenha(e.target.value)}
+            />
+            <button className="btn-primary" onClick={verificarSenha}>Entrar</button>
 
-      <div>
-        <input
-          type="password"
-          placeholder="Digite a senha atual"
-          value={tentativaSenha}
-          onChange={(e) => setTentativaSenha(e.target.value)}
-        />
-        <button onClick={verificarSenha}>Verificar Senha</button>
+            {permitirRedefinir && (
+              <>
+                <input
+                  type="password"
+                  placeholder="Nova senha"
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
+                />
+                <button className="btn-danger" onClick={redefinirSenha}>Redefinir Senha</button>
+              </>
+            )}
+
+            <p>{resultado}</p>
+          </div>
+        )}
+
+        {autenticado && (
+          <div className="fade-elements">
+            <button className="btn-danger" onClick={logout}>Sair</button>
+          </div>
+        )}
       </div>
-
-      {permitirRedefinir && (
-        <div style={{ marginTop: '1rem' }}>
-          <input
-            type="password"
-            placeholder="Nova senha"
-            value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
-          />
-          <button onClick={redefinirSenha}>Redefinir Senha</button>
-        </div>
-      )}
-
-      <p>{resultado}</p>
     </div>
   );
 }
